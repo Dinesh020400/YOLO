@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Files</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles1.css') }}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f2f2f2;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        form {
+            text-align: center;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        select, input[type="file"], input[type="submit"] {
+            margin-bottom: 20px;
+        }
+
+        input[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+
+        #previewContainer {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 20px; /* Add gap between video previews */
+        }
+
+        .videoPreview {
+            width: calc(50% - 10px); /* Adjusted width to accommodate for gap */
+            height: auto;
+        }
+
+        /* Modal styles */
+        .modal {
+          display: none; /* Hidden by default */
+          position: fixed; /* Stay in place */
+          z-index: 1; /* Sit on top */
+          left: 0;
+          top: 0;
+          width: 100%; /* Full width */
+          height: 100%; /* Full height */
+          overflow: auto; /* Enable scroll if needed */
+          background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+        }
+
+        .modal-content {
+          background-color: #fefefe;
+          margin: 15% auto; /* 15% from the top and centered */
+          padding: 20px;
+          border: 1px solid #888;
+          width: 80%; /* Could be more or less, depending on screen size */
+        }
+
+        .close {
+          color: #aaa;
+          float: right;
+          font-size: 28px;
+          font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+          color: black;
+          text-decoration: none;
+          cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Upload Files</h1>
+        <form id="uploadForm" action="/upload" method="POST" enctype="multipart/form-data">
+            <label for="num_ways">Select Number of Ways:</label>
+            <select name="num_ways" id="num_ways">
+                <option value="2">2 Way</option>
+                <option value="3">3 Way</option>
+                <option value="4" selected>4 Way</option>
+            </select>
+            <br>
+            <label for="files">Upload Files:</label>
+            <input type="file" name="files" id="files" multiple accept="video/*" onchange="showPreviews(this)">
+            <br>
+            <label for="preview">Previews:</label>
+            <div id="previewContainer"></div>
+            <br>
+            <input type="submit" value="Upload" id="uploadButton">
+        </form>
+    </div>
+
+    <!-- Modal -->
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <p id="alertMessage"></p>
+        </div>
+    </div>
+
+    <script>
+        // Function to display custom alert
+        function customAlert(message) {
+            var alertMessage = document.getElementById("alertMessage");
+            alertMessage.innerHTML = message;
+            modal.style.display = "block";
+        }
+
+        // Get the modal
+        var modal = document.getElementById("myModal");
+
+        // Get the <span> element that closes the modal
+        var span = document.getElementsByClassName("close")[0];
+
+        // When the user clicks on <span> (x), close the modal
+        span.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        // Get the form and upload button elements
+        var uploadForm = document.getElementById("uploadForm");
+        var uploadButton = document.getElementById("uploadButton");
+
+        // Add event listener for form submission
+        uploadForm.addEventListener("submit", function(event) {
+            const numWays = parseInt(document.getElementById('num_ways').value);
+            const files = document.getElementById('files').files;
+
+            if (files.length !== numWays) {
+                customAlert(`Please select exactly ${numWays} video(s).`);
+                event.preventDefault(); // Prevent form submission
+            }
+        });
+
+        function showPreviews(input) {
+            const numWays = parseInt(document.getElementById('num_ways').value);
+            const files = input.files;
+            const previewContainer = document.getElementById('previewContainer');
+            previewContainer.innerHTML = ''; // Clear previous previews
+
+            if (files.length !== numWays) {
+                customAlert(`Please select exactly ${numWays} video(s).`);
+                return;
+            }
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const fileReader = new FileReader();
+
+                fileReader.onload = function(event) {
+                    const videoPreview = document.createElement('video');
+                    videoPreview.src = event.target.result;
+                    videoPreview.classList.add('videoPreview');
+                    videoPreview.setAttribute('controls', 'true'); // Enable controls
+                    previewContainer.appendChild(videoPreview);
+                };
+
+                if (file) {
+                    fileReader.readAsDataURL(file);
+                }
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login or Sign Up</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        /* CSS styles */
+        body {
+            background-color: #4CAF50;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 70vh;
+            flex-direction: column;
+        }
+
+        .typing-effect {
+            overflow: hidden;
+            border-right: .15em solid #4CAF50;
+            white-space: nowrap;
+            margin-bottom: 50px;
+            color: #333; /* Text color */
+            animation: typing 3s steps(30, end), blink-caret .5s step-end infinite alternate;
+        }
+
+        @keyframes typing {
+            from { width: 0 }
+            to { width: 100% }
+        }
+
+        @keyframes blink-caret {
+            from, to { border-color: transparent }
+            50% { border-color: #4CAF50; }
+        }
+
+        .forms-container {
+            text-align: center;
+        }
+
+        .form {
+            display: none; /* Initially hide the forms */
+        }
+
+        .active {
+            display: block; /* Show the active form */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="typing-effect">YOLO Traffic Detection..</h1>
+        <div class="forms-container">
+            <form id="login-form" class="form active" action="{{ url_for('login') }}" method="post">
+                <h2>Login</h2>
+                <div class="input-container">
+                    <input type="text" id="username" name="username" placeholder="Username" required>
+                </div>
+                <div class="input-container">
+                    <input type="password" id="password" name="password" placeholder="Password" required>
+                </div>
+                <button type="submit">Login</button>
+                <p>Don't have an account? <a href="#" id="signup-link">Sign Up</a></p>
+            </form>
+            <form id="signup-form" class="form" action="{{ url_for('signup') }}" method="post">
+                <h2>Sign Up</h2>
+                <div class="input-container">
+                    <input type="text" id="new-username" name="new-username" placeholder="New Username" required>
+                </div>
+                <div class="input-container">
+                    <input type="password" id="new-password" name="new-password" placeholder="New Password" required>
+                </div>
+                <button type="submit">Sign Up</button>
+                <p>Already have an account? <a href="#" id="login-link">Login</a></p>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // JavaScript
+        document.getElementById('signup-link').addEventListener('click', function(event) {
+            event.preventDefault(); // Prevent the default action of the link
+            document.getElementById('login-form').classList.remove('active'); // Hide login form
+            document.getElementById('signup-form').classList.add('active'); // Show signup form
+        });
+
+        document.getElementById('login-link').addEventListener('click', function(event) {
+            event.preventDefault(); // Prevent the default action of the link
+            document.getElementById('signup-form').classList.remove('active'); // Hide signup form
+            document.getElementById('login-form').classList.add('active'); // Show login form
+        });
+    </script>
+</body>
+</html>

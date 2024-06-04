@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YOLO Traffic Detection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            background-color: lightgreen;
+            padding: 10px;
+            text-align: center;
+            /* Center the text */
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            padding-top: 20px;
+            /* Add some padding at the top */
+        }
+
+        .box {
+            position: relative;
+            margin: 10px;
+            width: calc(50% - 20px);
+            /* Make each box 50% width with some margin */
+            height: 50vh;
+            /* Set the height of each box to half of the viewport height */
+            overflow: hidden;
+            border-radius: 5px;
+        }
+
+        .image {
+            width: auto;
+            /* Auto width to maintain aspect ratio */
+            height: auto;
+            /* Auto height to maintain aspect ratio */
+            max-width: 100%;
+            /* Set maximum width to 100% */
+            max-height: 100%;
+            /* Set maximum height to 100% */
+            object-fit: contain;
+            /* Adjusted to contain to ensure the image fully fits within the container without over-zooming */
+        }
+
+        .annotation-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: #fff;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        h2 {
+            padding: 5px;
+            text-align: center;
+            /* Center the text */
+        }
+
+        p {
+            margin: 5px 0 0;
+            font-size: 14px;
+        }
+
+        .image {
+            width: 100%;
+            max-height: 100%;
+            /* Set maximum height for images */
+            object-fit: cover;
+        }
+
+        .timing-circle {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: red; /* Initial color */
+            transition: background-color 1s ease-in-out; /* Transition effect */
+        }
+    </style>
+</head>
+
+<body>
+    <h1>YOLO Traffic Detection</h1>
+    <h2>Total time required: <span id="total-time">{{ timing.split()[-1] }}</span> sec</h2>
+    <div class="container">
+        <div class="box">
+            <img class="image" src="{{ url_for('static', filename='annotated_images/1_frame4.0.jpg') }}" alt="Annotated Image">
+            <div class="timing-circle" id="timing-circle1"></div> <!-- Circle for timing -->
+            <div class="annotation-overlay">
+                <p>LANE 1</p>
+                <p>YOLO Vehicle Detection: {{ vehicle_counts[0] }}</p>
+                <p>Required time to clear vehicle in the lane: {{ timing.split()[0][1:-1] }} sec</p>
+            </div>
+        </div>
+        <div class="box">
+            <img class="image" src="{{ url_for('static', filename='annotated_images/2_frame55.0.jpg') }}" alt="Annotated Image">
+            <div class="timing-circle" id="timing-circle2"></div>
+            <div class="annotation-overlay">
+                <p>LANE 2</p>
+                <p>YOLO Vehicle Detection: {{ vehicle_counts[1] }}</p>
+                <p>Required time to clear vehicle in the lane: {{ timing.split()[1][1:-1] }} sec</p>
+            </div>
+        </div>
+        <div class="box">
+            <img class="image" src="{{ url_for('static', filename='annotated_images/3_frame23.0.jpg') }}" alt="Annotated Image">
+            <div class="timing-circle" id="timing-circle3"></div>
+            <div class="annotation-overlay">
+                <p>LANE 3</p>
+                <p>YOLO Vehicle Detection: {{ vehicle_counts[2] }}</p>
+                {% set timing_parts = timing.replace(',', '').replace(']', '').split() if timing else ['0', '0'] %}
+                <p>Required time to clear vehicle in the lane: {{ timing_parts[2] }} sec</p>
+            </div>
+        </div>
+        <div class="box">
+            <img class="image" src="{{ url_for('static', filename='annotated_images/4_frame45.0.jpg') }}" alt="Annotated Image">
+            <div class="timing-circle" id="timing-circle4"></div>
+            <div class="annotation-overlay">
+                <p>LANE 4</p>
+                <p>YOLO Vehicle Detection: {{ vehicle_counts[3] }}</p>
+                <p>Required time to clear vehicle in the lane: {{ timing_parts[3] }} sec</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+     // Get timing elements
+     const timingCircles = document.querySelectorAll('.timing-circle');
+
+// Get total time in seconds
+const totalTimeSeconds = parseInt(document.getElementById('total-time').textContent);
+
+// Function to change timing circle color
+function changeColor(index, remainingTime) {
+    if (index < timingCircles.length && remainingTime > 0) {
+        const requiredTime = parseFloat(document.querySelectorAll('.annotation-overlay p:nth-child(3)')[index].textContent.split(":")[1].trim());
+        timingCircles[index].style.backgroundColor = 'green'; // Change current circle to green
+        if (index > 0) {
+            timingCircles[index - 1].style.backgroundColor = 'red'; // Change previous circle to red
+        }
+        setTimeout(() => {
+            changeColor(index + 1, remainingTime - requiredTime); // Recursively call for the next circle
+        }, requiredTime * 1000); // Use the required time for the lane in seconds
+    }
+}
+
+// Start color change process
+changeColor(0, totalTimeSeconds);
+</script>
+</body>
+
+</html>
